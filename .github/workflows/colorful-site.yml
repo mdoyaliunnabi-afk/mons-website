@@ -1,0 +1,37 @@
+name: Colorful MONS Website
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/colorful-site.yml'
+jobs:
+  color:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply colorful styling
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          css='''<style id="mons-colorful">\n:root{--p:#6c4cff;--dark:#15112b;--muted:#62677a;--line:#e8e3ff;--bg:#f7f5ff}\nbody{background:linear-gradient(135deg,#f8f7ff 0%,#eef8ff 48%,#fff4fb 100%)}\nheader{background:linear-gradient(90deg,#ffffffee,#f7f2ffee,#f0f8ffee);border-bottom:2px solid #e7ddff}\n.logo b{background:linear-gradient(90deg,#6c4cff,#ff3f9b,#00a8ff);-webkit-background-clip:text;background-clip:text;color:transparent}\nnav a:hover{background:#eee9ff;color:#6c4cff}\n.login{background:linear-gradient(135deg,#6c4cff,#9b5cff)!important}.signup{background:linear-gradient(135deg,#ff3f9b,#ff6b6b)!important}.cart{background:linear-gradient(135deg,#00a8ff,#1769ff)!important}\n.hero{background:radial-gradient(circle at 10% 20%,#ff4fa322,transparent 25%),radial-gradient(circle at 85% 10%,#00d9ff55,transparent 28%),radial-gradient(circle at 65% 85%,#b45cff66,transparent 32%),linear-gradient(135deg,#17122f,#3b1970 52%,#1268a8)}\n.pill{background:#ffffff20;border-color:#ffffff55}.btn{background:linear-gradient(135deg,#fff,#e8e1ff);box-shadow:0 10px 25px #0002}.btn.alt{background:linear-gradient(135deg,#ffffff20,#ffffff08)}\n.section h2{background:linear-gradient(90deg,#6c4cff,#ff3f9b,#00a8ff);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}\n.card{border:1px solid #e4dcff;background:linear-gradient(180deg,#fff,#fbfaff);box-shadow:0 14px 35px #6c4cff12;transition:transform .2s,box-shadow .2s,border-color .2s}.card:hover{transform:translateY(-5px);box-shadow:0 20px 45px #6c4cff22;border-color:#b9a7ff}\n.pic{background:linear-gradient(135deg,#eee9ff,#e5f7ff 55%,#fff0f7);border:1px solid #e7e0ff}.tag{color:#ff3f9b}.mini{background:linear-gradient(135deg,#eee9ff,#e5e0ff);color:#5b3ee8}.mini.dark{background:linear-gradient(135deg,#242044,#4b3b91)}.mini.buy{background:linear-gradient(135deg,#6c4cff,#ff3f9b)}\n.why{background:linear-gradient(135deg,#fff,#f5f0ff,#effaff)}.feature{background:linear-gradient(135deg,#ffffff,#f8f5ff);border-color:#e3dcff;box-shadow:0 10px 30px #6c4cff0d}.features .feature:nth-child(2){background:linear-gradient(135deg,#fff,#eefbff)}.features .feature:nth-child(3){background:linear-gradient(135deg,#fff,#fff0f7)}\n.cta{background:radial-gradient(circle at 20% 20%,#ff3f9b55,transparent 30%),radial-gradient(circle at 80% 80%,#00a8ff55,transparent 30%),linear-gradient(135deg,#24174f,#6335b5)}\n.social{background:linear-gradient(135deg,#fff,#f8f4ff,#f0fbff)}.social-links a{background:linear-gradient(135deg,#fff,#faf9ff);border-color:#e1dcf5}.social-links .wa{background:#edfff5;border-color:#bcefd0}.social-links .ig{background:#fff0f7;border-color:#ffc4dd}.social-links .tt{background:#f2f2f5;border-color:#d7d7df}.social-links .fb{background:#eef5ff;border-color:#c9dcff}\nfooter{color:#66607b}\n</style>'''
+          if 'id="mons-colorful"' not in s:
+              s=s.replace('</style>', '</style>'+css, 1)
+              p.write_text(s)
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Add colorful premium MONS styling'
+          git push
+      - name: Remove temporary workflow
+        run: |
+          rm .github/workflows/colorful-site.yml
+          git add .github/workflows/colorful-site.yml
+          git commit -m 'Remove temporary color workflow' || true
+          git push || true
