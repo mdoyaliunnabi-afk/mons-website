@@ -1,0 +1,13 @@
+{
+  "name": "MONS UAE Online Store",
+  "short_name": "MONS",
+  "description": "MONS — modern essentials and useful products for UAE shoppers.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#6d4aff",
+  "icons": [
+    {"src":"mons-logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
