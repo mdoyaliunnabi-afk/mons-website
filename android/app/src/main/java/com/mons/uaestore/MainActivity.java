@@ -1,5 +1,6 @@
 package com.mons.uaestore;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,10 +8,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.appcompat.app.AppCompatActivity;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private WebView webView;
 
     @Override
@@ -18,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         webView = new WebView(this);
         setContentView(webView);
-
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setAllowFileAccess(false);
@@ -35,11 +32,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         webView.loadUrl("https://mdoyaliunnabi-afk.github.io/mons-website/");
+    }
 
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override public void handleOnBackPressed() {
-                if (webView.canGoBack()) webView.goBack(); else finish();
-            }
-        });
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) webView.goBack(); else super.onBackPressed();
     }
 }
