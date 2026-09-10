@@ -39,7 +39,6 @@ function monsSetGallery(n){
 function galleryMove(dir){monsSetGallery((dir>0?1:3));}
 function closeGallery(){const g=document.getElementById('gallery');if(g)g.classList.remove('show');}
 
-/* Stable social icons */
 (function(){
  const s=document.createElement('style');
  s.textContent=`.social-links a{display:inline-flex!important;align-items:center;justify-content:center;gap:9px;min-height:48px;font-weight:900;line-height:1;border-radius:14px}.social-links .mons-social-icon{width:23px;height:23px;display:inline-block;flex:0 0 23px}.social-links .mons-social-icon svg{width:100%;height:100%;display:block}@media(max-width:600px){.social-links a{min-height:50px;padding:11px 10px}.social-links .mons-social-icon{width:22px;height:22px;flex-basis:22px}}`;
@@ -54,33 +53,39 @@ function closeGallery(){const g=document.getElementById('gallery');if(g)g.classL
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
 })();
 
-/* Keep all header actions visible on small screens. */
 (function(){const s=document.createElement('style');s.textContent=`@media(max-width:700px){header .nav{overflow:hidden;align-items:center}header nav{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:72vw;scrollbar-width:none}header nav::-webkit-scrollbar{display:none}header nav a,header nav button{white-space:nowrap;flex:0 0 auto;font-size:11px;padding:8px 7px}.logo{flex:0 0 auto}.logo b{display:none}}`;document.head.appendChild(s)})();
 
-/* Cart product details: add image, description and price to every cart item without changing the existing cart logic. */
+/* Fixed cart details: works with the global products array even when it is not a window property. */
 (function(){
  const s=document.createElement('style');
- s.textContent=`#cartItems .cart-item{display:grid!important;grid-template-columns:72px 1fr auto;align-items:center;gap:12px;padding:14px 0}#cartItems .mons-cart-pic{width:72px;height:72px;border-radius:12px;overflow:hidden;background:#f4f5f8;border:1px solid var(--line);display:block}#cartItems .mons-cart-pic img{width:100%;height:100%;object-fit:cover;display:block}#cartItems .mons-cart-info{min-width:0}#cartItems .mons-cart-name{font-weight:900;font-size:15px;margin-bottom:4px}#cartItems .mons-cart-desc{font-size:12px;color:var(--muted);line-height:1.35;margin-bottom:5px}#cartItems .mons-cart-price{font-size:13px;font-weight:900;color:#5b3ee8}#cartItems .qty{white-space:nowrap}@media(max-width:600px){#cartItems .cart-item{grid-template-columns:58px 1fr;gap:9px}#cartItems .mons-cart-pic{width:58px;height:58px}#cartItems .qty{grid-column:2;justify-self:start}}
+ s.textContent=`#cartItems .cart-item{display:grid!important;grid-template-columns:76px 1fr auto;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}#cartItems .mons-cart-pic{width:76px;height:76px;border-radius:13px;overflow:hidden;background:#f4f5f8;border:1px solid var(--line);display:block}#cartItems .mons-cart-pic img{width:100%;height:100%;object-fit:cover;display:block}#cartItems .mons-cart-info{min-width:0}#cartItems .mons-cart-name{font-weight:900;font-size:15px;margin-bottom:4px}#cartItems .mons-cart-desc{font-size:12px;color:var(--muted);line-height:1.35;margin-bottom:5px}#cartItems .mons-cart-price{font-size:13px;font-weight:900;color:#5b3ee8}#cartItems .qty{white-space:nowrap}@media(max-width:600px){#cartItems .cart-item{grid-template-columns:62px 1fr;gap:9px}#cartItems .mons-cart-pic{width:62px;height:62px}#cartItems .qty{grid-column:2;justify-self:start;margin-top:4px}}
  `;
  document.head.appendChild(s);
+ function getProducts(){try{return products}catch(e){return null}}
  function enrich(){
-  const box=document.getElementById('cartItems');if(!box||!window.products)return;
+  const box=document.getElementById('cartItems');const list=getProducts();
+  if(!box||!list)return;
   box.querySelectorAll('.cart-item').forEach(item=>{
-   if(item.querySelector('.mons-cart-info'))return;
-   const text=item.innerText||'';
+   const text=item.innerText||item.textContent||'';
    let idx=-1;
-   for(let i=0;i<products.length;i++){if(text.includes(products[i][1])){idx=i;break;}}
+   for(let i=0;i<list.length;i++){if(text.includes(list[i][1])){idx=i;break;}}
    if(idx<0)return;
-   const img=document.createElement('div');img.className='mons-cart-pic';img.innerHTML=`<img src="${MONS_REAL_IMAGES[idx]}" alt="${products[idx][1]}">`;
-   const info=document.createElement('div');info.className='mons-cart-info';info.innerHTML=`<div class="mons-cart-name">${products[idx][1]}</div><div class="mons-cart-desc">${products[idx][2]}</div><div class="mons-cart-price">AED ${products[idx][3]} each</div>`;
    const qty=item.querySelector('.qty');
-   while(item.firstChild)item.removeChild(item.firstChild);
-   item.appendChild(img);item.appendChild(info);if(qty)item.appendChild(qty);
+   if(!qty)return;
+   const oldInfo=item.querySelector('.mons-cart-info');
+   if(oldInfo)oldInfo.remove();
+   const oldPic=item.querySelector('.mons-cart-pic');
+   if(oldPic)oldPic.remove();
+   const img=document.createElement('div');img.className='mons-cart-pic';img.innerHTML=`<img src="${MONS_REAL_IMAGES[idx]}" alt="${list[idx][1]}">`;
+   const info=document.createElement('div');info.className='mons-cart-info';info.innerHTML=`<div class="mons-cart-name">${list[idx][1]}</div><div class="mons-cart-desc">${list[idx][2]}</div><div class="mons-cart-price">AED ${list[idx][3]} each</div>`;
+   item.insertBefore(img,item.firstChild);
+   item.insertBefore(info,qty);
   });
  }
- const mo=new MutationObserver(enrich);mo.observe(document.body,{childList:true,subtree:true});
- document.addEventListener('click',e=>{if(e.target.closest('[onclick*="addToCart"],#cartModal,.cart'))setTimeout(enrich,80);});
- window.addEventListener('load',()=>setTimeout(enrich,200));
+ const mo=new MutationObserver(()=>setTimeout(enrich,0));
+ mo.observe(document.body,{childList:true,subtree:true});
+ document.addEventListener('click',()=>setTimeout(enrich,100));
+ window.addEventListener('load',()=>{setTimeout(enrich,300);setTimeout(enrich,1000)});
 })();
 
 window.addEventListener('load',renderProductsWithRealImages);
