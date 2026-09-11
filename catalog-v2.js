@@ -22,7 +22,7 @@ function img(p){return p.image||`https://loremflickr.com/700/700/${encodeURIComp
 window.dailyImage=img;
 window.render=function(list,q=''){
   const g=document.getElementById('productGrid');if(!g)return;
-  g.innerHTML=list.map(p=>`<article class="card"><div class="pic mons-view-pic" onclick="monsOpenProduct(${p.id})" role="button" tabindex="0" aria-label="View ${p.name}"><img src="${img(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='https://loremflickr.com/700/700/${encodeURIComponent(p.name)}?lock=${p.id+5000}'"></div><span class="tag">${p.brand}</span><h3>${p.name}</h3><p>${p.description}</p><div class="meta"><span>${p.stock}</span><span>${p.category}</span></div><div class="price-row"><span class="price">AED ${Number(p.price).toFixed(2)}</span><div class="product-actions"><button class="mini" type="button" onclick="event.stopPropagation();monsAdd(${p.id})">Add to Cart</button><button class="mini buy" type="button" onclick="event.stopPropagation();monsBuy(${p.id})">Buy Now</button></div></div></article>`).join('');
+  g.innerHTML=list.map(p=>`<article class="card"><div class="pic mons-view-pic" onclick="monsOpenProduct(${p.id})" role="button" tabindex="0" aria-label="View ${p.name}"><img src="${img(p)}" alt="${p.name}" loading="lazy" onerror="this.onerror=null;this.src='https://loremflickr.com/700/700/${encodeURIComponent(p.name)}?lock=${p.id+5000}'></div><span class="tag">${p.brand}</span><h3>${p.name}</h3><p>${p.description}</p><div class="meta"><span>${p.stock}</span><span>${p.category}</span></div><div class="price-row"><span class="price">AED ${Number(p.price).toFixed(2)}</span><div class="product-actions"><button class="mini" type="button" onclick="event.stopPropagation();monsAdd(${p.id})">Add to Cart</button><button class="mini buy" type="button" onclick="event.stopPropagation();monsBuy(${p.id})">Buy Now</button></div></div></article>`).join('');
   const r=document.getElementById('resultText');if(r)r.textContent=q?`Showing ${list.length} products for “${q}”`:`Showing all ${list.length} products`;
   const e=document.getElementById('empty');if(e)e.style.display=list.length?'none':'block';
 };
@@ -31,4 +31,49 @@ window.monsOpenProduct=function(pid){location.href='view.html?id='+encodeURIComp
 window.monsAdd=function(pid){const p=window.MONS_PRODUCTS.find(x=>String(x.id)===String(pid));if(!p)return;let c=JSON.parse(localStorage.getItem('monsCart')||'[]'),x=c.find(a=>String(a.id)===String(p.id));if(x)x.qty=Number(x.qty||1)+1;else c.push({id:p.id,name:p.name,price:Number(p.price),image:img(p),qty:1});localStorage.setItem('monsCart',JSON.stringify(c));const n=document.getElementById('cartCount');if(n)n.textContent=c.reduce((s,a)=>s+Number(a.qty||1),0)};
 window.monsBuy=function(pid){window.monsAdd(pid);location.href='cart.html'};
 window.addEventListener('load',function(){window.render(window.MONS_PRODUCTS);document.querySelectorAll('.cat').forEach(c=>{const q=(c.dataset.q||'').trim().toLowerCase();if(q){const n=window.MONS_PRODUCTS.filter(p=>p.category.toLowerCase()===q).length;c.textContent=c.textContent.replace(/\s*·\s*\d+$/,'')+' · '+n;}});const n=document.getElementById('cartCount');if(n){const c=JSON.parse(localStorage.getItem('monsCart')||'[]');n.textContent=c.reduce((s,a)=>s+Number(a.qty||1),0)}});
+})();
+
+/* MONS navigation repair: keep every header control functional. */
+(function(){
+  const style=document.createElement('style');
+  style.textContent='.mobile-menu.open{display:block!important}.mons-auth{display:flex;align-items:center;gap:6px}.mons-auth a{display:inline-flex;align-items:center;justify-content:center;padding:9px 10px;border-radius:7px;font-size:10px;font-weight:900}.mons-login{border:1px solid #d9d0f5;background:#fff;color:#44346f}.mons-signup{background:linear-gradient(135deg,#6c4cff,#ff3f9b);color:#fff}.mons-cat-link.active{color:#f5d27a!important}@media(max-width:760px){.mons-auth{display:none}}';
+  document.head.appendChild(style);
+  const nav=document.querySelector('.mainnav');
+  if(nav){
+    const labels=["Men’s Fashion","Women’s Fashion","Beauty","Home & Kitchen","Gadgets","Pet Products","Electronics"];
+    nav.querySelectorAll('a').forEach(a=>{
+      const label=a.textContent.trim();
+      if(labels.includes(label)){
+        a.classList.add('mons-cat-link');
+        a.dataset.category=label;
+        a.href='#products';
+        a.addEventListener('click',function(e){
+          e.preventDefault();
+          nav.querySelectorAll('.mons-cat-link').forEach(x=>x.classList.remove('active'));
+          a.classList.add('active');
+          const list=window.MONS_PRODUCTS.filter(p=>p.category===label);
+          const input=document.getElementById('searchInput');
+          if(input)input.value='';
+          if(window.render)window.render(list,label);
+          document.getElementById('products')?.scrollIntoView({behavior:'smooth',block:'start'});
+        });
+      }
+    });
+    if(!nav.querySelector('a[href="about.html"]'))nav.insertAdjacentHTML('beforeend','<a href="about.html">About</a>');
+    if(!nav.querySelector('a[href="contact.html"]'))nav.insertAdjacentHTML('beforeend','<a href="contact.html">Contact</a>');
+  }
+  const actions=document.querySelector('.nav-actions');
+  if(actions && !actions.querySelector('.mons-auth')){
+    const auth=document.createElement('div');
+    auth.className='mons-auth';
+    auth.innerHTML='<a class="mons-login" href="login.html">Log in</a><a class="mons-signup" href="signup.html">Sign up</a>';
+    actions.insertBefore(auth,actions.firstChild);
+  }
+  const menu=document.getElementById('mobileMenu');
+  if(menu){
+    if(!menu.querySelector('a[href="about.html"]'))menu.insertAdjacentHTML('beforeend','<a href="about.html">About</a>');
+    if(!menu.querySelector('a[href="contact.html"]'))menu.insertAdjacentHTML('beforeend','<a href="contact.html">Contact</a>');
+    if(!menu.querySelector('a[href="login.html"]'))menu.insertAdjacentHTML('beforeend','<a href="login.html">Log in</a>');
+    if(!menu.querySelector('a[href="signup.html"]'))menu.insertAdjacentHTML('beforeend','<a href="signup.html">Sign up</a>');
+  }
 })();
