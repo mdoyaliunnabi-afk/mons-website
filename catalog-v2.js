@@ -21,3 +21,8 @@ document.addEventListener('keydown',function(e){const el=document.activeElement;
    document.body.classList.toggle('menu-open-lock',open);
  },true);
 })();
+(function(){
+ const s=document.createElement('style');
+ s.textContent=`#mobileMenu{box-sizing:border-box!important}#mobileMenu.open{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important}#mobileMenu a{display:block!important;width:100%!important;box-sizing:border-box!important;white-space:normal!important;float:none!important;clear:both!important;line-height:1.35!important;padding:13px 14px!important;margin:0!important;border-bottom:1px solid #262626!important;text-align:left!important}#mobileMenu a:last-child{border-bottom:0!important}`;
+ document.head.appendChild(s);
+})();
