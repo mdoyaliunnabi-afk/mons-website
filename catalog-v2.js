@@ -23,3 +23,6 @@ window.search=function(q=''){q=q.toLowerCase().trim();window.render(window.MONS_
 
 /* MONS keyboard support for product-image view */
 document.addEventListener('keydown',function(e){const el=document.activeElement;if((e.key==='Enter'||e.key===' ')&&el&&el.classList&&el.classList.contains('mons-view-pic')){e.preventDefault();el.click()}});
+
+/* Product pages can request five thumbnails even when their HTML still slices the gallery. */
+window.MONS_PRODUCTS.forEach(function(p){var g=p.gallery.slice();g.slice=function(){return Array.prototype.slice.call(this,0,5)};p.gallery=g;});
